@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSpliter.Interfaces", "F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSpliter.Models", "FileSpliter.Models\FileSpliter.Models.csproj", "{FEBAB5B9-C25B-45CC-8525-48D19568060B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSpliter.BLL", "E:\Денис. 3  курс\2 семестр\ИТ\Решения\file-spliter\FileSpliter.BLL\FileSpliter.BLL.csproj", "{D881112D-0F82-45ED-AD3A-18B209B7FAB6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSpliter.BLL", "FileSpliter.BLL\FileSpliter.BLL.csproj", "{D881112D-0F82-45ED-AD3A-18B209B7FAB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
