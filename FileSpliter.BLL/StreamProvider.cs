@@ -8,7 +8,7 @@ using File = FileSpliter.Models.File;
 
 namespace FileSpliter.BLL
 {
-    class StreamProvider : IStreamProvider
+    public class StreamProvider : IStreamProvider
     {
         public File SplitStream(Stream stream, int partsCount, string fileName)
         {
