@@ -108,7 +108,7 @@ namespace FileSpliter.BLL.Tests
         [TestCase(1)]
         [TestCase(7)]
         [TestCase(10000)]
-        public void SplitStream_VariousPartsCount_ChecksFilePartsCount(int partsCount)
+        public void SplitStream_VariousPartsCount_NumberOfPartsInParameterAndInResultShouldBeEqual(int partsCount)
         {
             Models.File file = SUT.SplitStream(
                 new MemoryStream(GetBuffer(partsCount+1)), partsCount, FileNameExample);
