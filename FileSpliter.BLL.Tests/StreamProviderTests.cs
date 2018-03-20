@@ -8,92 +8,93 @@ namespace FileSpliter.BLL.Tests
     [TestFixture]
     public class StreamProviderTests
     {
+        private const string FileNameExample = "ab.txt";
+
         /// <summary>
-        /// тестируемая система
+        /// system for test
         /// </summary>
         private StreamProvider SUT;
 
         /// <summary>
-        /// установка нового
-        /// экземпляра провайдера
+        /// set new instance of StreamProvider 
+        /// to SUT field
         /// </summary>
-        private void SetSUT()
+        [SetUp]
+        public void Setup()
         {
             SUT = new StreamProvider();
         }
 
         /// <summary>
-        /// создание массива байтов,
-        /// заполненного нулями
+        /// create byte array, that
+        /// filled with zero-values
         /// </summary>
-        /// <param name="len">длина массива</param>
-        /// <returns>массив байтов</returns>
-        private static byte[] GetBuffer(int len)
+        /// <param name="length">array length</param>
+        /// <returns>byte array</returns>
+        private static byte[] GetBuffer(int length)
         {
-            //создаем пустой массив размера
-            //len и заполняем его нулями
-            byte[] buffer = new byte[len];
-            for (int i = 0; i < len; i++)
+            //create byte array with length size
+            //and fill it with zero values
+            byte[] buffer = new byte[length];
+            for (int i = 0; i < length; i++)
                 buffer[i] = 0;
             return buffer;
         }
         
         /// <summary>
-        /// проверка размера потока после склеивания
+        /// test stream size after merge
         /// </summary>
-        /// <param name="partsLens">размеры частей</param>
+        /// <param name="partsSizes">size of parts</param>
         [TestCase(3)]
         [TestCase(1,5,3,10,18)]
         [TestCase(92,44)]
-        public void MergeStreams_VariousParts_ChecksSumLength(params int[] partsLens)
+        public void MergeStreams_VariousParts_ShouldReturnStreamWithCorrectBufferLength(params int[] partsSizes)
         {
-            SetSUT();
 
-            //создаем массив частей, что будут склеены
-            FilePart[] parts = new FilePart[partsLens.Length];
-            int sumLen = 0;
+            //create parts for merge
+            FilePart[] parts = new FilePart[partsSizes.Length];
+            int sumLength = 0;
 
-            //заполняем его массивами,
-            //размеры которых указаны в параметрах
+            //fill parts with byte arrays,
+            //we get size of arrays from test params
             for(int i=0;i<parts.Length;i++)
             {
                 parts[i] = new FilePart();
-                parts[i].DataBytesArray = GetBuffer(partsLens[i]);
-                sumLen += partsLens[i];
+                parts[i].DataBytesArray = GetBuffer(partsSizes[i]);
+                sumLength += partsSizes[i];
             }
 
-            //получаем поток и сверяем сумму
+            //get stream and check sum
             Stream stream = SUT.MergeStreams(parts);
-            Assert.AreEqual(sumLen, stream.Length);
+            Assert.AreEqual(sumLength, stream.Length);
         }
 
         /// <summary>
-        /// проверка имени файла в его частях
+        /// check file name in file parts
         /// </summary>
         [Test]
-        public void SplitStream_SomeFileName_ChecksItInFileParts()
+        public void SplitStream_SomeFileName_OriginalFileNameAndNamesInPartsShouldBeEqual()
         {
-            SetSUT();
-            //создаем обычный поток и делим его
+
+            //create simple stream and split it
             int partsCount = 5;
-            string fileName = "ab.txt";
+            string fileName = FileNameExample;
             Models.File file = SUT.SplitStream(
                 new MemoryStream(GetBuffer(partsCount+1)), partsCount, fileName);
 
-            //проверяем имена
+            //check names
             foreach (FilePart part in file.FileParts)
                 Assert.AreEqual(fileName, part.SummaryInfo.FileName);
         }
 
         /// <summary>
-        /// проверка выброса исключения при
-        /// несоответствии размера потока
-        /// и количества разбиваемых частей
+        /// test exception throwing when
+        /// stream size lower than 
+        /// number of parts
         /// </summary>
         [Test]
         public void SplitStream_PartsCountGreaterThanLength_ThrowsException()
         {
-            SetSUT();
             int len = 10;
             Assert.Throws<ArgumentException>(
                 () => SUT.SplitStream(
@@ -101,17 +102,16 @@ namespace FileSpliter.BLL.Tests
         }
 
         /// <summary>
-        /// проверяем количество частей после разбиения
+        /// test number of parts after splitting
         /// </summary>
-        /// <param name="partsCount">количество частей</param>
+        /// <param name="partsCount">number of parts</param>
         [TestCase(1)]
         [TestCase(7)]
         [TestCase(10000)]
         public void SplitStream_VariousPartsCount_ChecksFilePartsCount(int partsCount)
         {
-            SetSUT();
             Models.File file = SUT.SplitStream(
-                new MemoryStream(GetBuffer(partsCount+1)), partsCount, "ab.txt");
+                new MemoryStream(GetBuffer(partsCount+1)), partsCount, FileNameExample);
             Assert.AreEqual(partsCount, file.FileParts.Count);
         }
     }
