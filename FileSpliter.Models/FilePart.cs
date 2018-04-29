@@ -7,5 +7,6 @@ namespace FileSpliter.Models
     {
         public FileSummaryInfo SummaryInfo { get; set; }
         public byte[] DataBytesArray { get; set; }
+        public bool IsAvailable { get; set; }
     }
 }
