@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.13
+VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSpliter.Forms", "FileSpliter.Forms\FileSpliter.Forms.csproj", "{9F2DB3D1-FB3F-4072-8803-4F38869DA410}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSpliter.Models", "FileSpliter.Models\FileSpliter.Models.csproj", "{FEBAB5B9-C25B-45CC-8525-48D19568060B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSpliter.BLL", "FileSpliter.BLL\FileSpliter.BLL.csproj", "{D881112D-0F82-45ED-AD3A-18B209B7FAB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSpliter.BLL.Tests", "FileSpliter.BLL.Tests\FileSpliter.BLL.Tests.csproj", "{573DF16A-6D67-4FAE-B909-1777E83BAA68}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{D881112D-0F82-45ED-AD3A-18B209B7FAB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D881112D-0F82-45ED-AD3A-18B209B7FAB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D881112D-0F82-45ED-AD3A-18B209B7FAB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{573DF16A-6D67-4FAE-B909-1777E83BAA68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{573DF16A-6D67-4FAE-B909-1777E83BAA68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{573DF16A-6D67-4FAE-B909-1777E83BAA68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{573DF16A-6D67-4FAE-B909-1777E83BAA68}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

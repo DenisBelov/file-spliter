@@ -7,7 +7,7 @@ using File = FileSpliter.Models.File;
 
 namespace FileSpliter.BLL
 {
-    class FileSerializator : IFileSerializator
+    public class FileSerializator : IFileSerializator
     {
         public Task WriteFilePart(FilePart filePart, string folderPath)
         {

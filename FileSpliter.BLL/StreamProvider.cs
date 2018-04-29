@@ -8,7 +8,7 @@ using File = FileSpliter.Models.File;
 
 namespace FileSpliter.BLL
 {
-    class StreamProvider : IStreamProvider
+    public class StreamProvider : IStreamProvider
     {
         public File SplitStream(Stream stream, int partsCount, string fileName)
         {
@@ -34,7 +34,7 @@ namespace FileSpliter.BLL
                     };
                     var arraySize = i == partsCount - 1
                         ? bytesArray.Length / partsCount
-                        : (int)Math.Round((double)bytesArray.Length / partsCount);
+                        : (int) Math.Round((double) bytesArray.Length / partsCount);
                     var bytesArrayPart = new byte[arraySize];
                     for (int j = 0; j < arraySize; j++)
                     {
@@ -43,6 +43,10 @@ namespace FileSpliter.BLL
                     filePart.DataBytesArray = bytesArrayPart;
                     file.FileParts.Add(filePart);
                 }
+            }
+            else
+            {
+                throw new ArgumentException("Stream length is less than parts count");
             }
             foreach (var filePart in file.FileParts)
             {
