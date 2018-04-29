@@ -5,7 +5,7 @@ namespace FileSpliter.Interfaces
 {
     public interface IFileSerializator
     {
-        Task WriteFilePart(FilePart filePart, string folderPath);
+        Task WriteFile(File file, string folderPath);
         Task<FilePart> ReadFilePart(string path);
     }
 }
