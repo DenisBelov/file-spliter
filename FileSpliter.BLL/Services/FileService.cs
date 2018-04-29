@@ -9,13 +9,14 @@ namespace FileSpliter.BLL.Services
 {
     public class FileService : IFileService
     {
-        private IFileSerializator _fileSerializator;
-        private IStreamProvider _streamProvider;
+        public IFileSerializator FileSerializator { get; set; }
 
-        public FileService(IFileSerializator serializator, IStreamProvider streamProvider)
+        public IStreamProvider StreamProvider { get; set; }
+
+        public FileService()
         {
-            _fileSerializator = serializator;
-            _streamProvider = streamProvider;
+            FileSerializator = new FileSerializator();
+            StreamProvider = new StreamProvider();
         }
 
         public File Split(string path, int partsCount)
@@ -26,7 +27,7 @@ namespace FileSpliter.BLL.Services
                 var name = slashIndex > 0 ? path.Substring(slashIndex, path.Length - slashIndex) : path;
                 var dotIndex = path.LastIndexOf(".", StringComparison.Ordinal);
                 name = dotIndex > 0 ? name.Substring(0, dotIndex) : name;
-                var file = _streamProvider.SplitStream(stream, partsCount, name);
+                var file = StreamProvider.SplitStream(stream, partsCount, name);
                 return file;
             }
         }
@@ -35,13 +36,13 @@ namespace FileSpliter.BLL.Services
         {
             foreach (var filePart in file.FileParts)
             {
-                _fileSerializator.WriteFilePart(filePart, path);
+                FileSerializator.WriteFilePart(filePart, path);
             }
         }
 
         public void SaveFile(File file, string path)
         {
-            using (var streamToWrite = _streamProvider.MergeStreams(file.FileParts))
+            using (var streamToWrite = StreamProvider.MergeStreams(file.FileParts))
             {
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
@@ -52,7 +53,7 @@ namespace FileSpliter.BLL.Services
 
         public async Task<File> ReadFilePart(string path)
         {
-            var part = await _fileSerializator.ReadFilePart(path);
+            var part = await FileSerializator.ReadFilePart(path);
             var file = new File();
             file.FileParts.Add(part);
             foreach (var filePart in part.SummaryInfo.FileParts)
