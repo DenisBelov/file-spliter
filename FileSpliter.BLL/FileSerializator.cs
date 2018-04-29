@@ -9,19 +9,22 @@ namespace FileSpliter.BLL
 {
     class FileSerializator : IFileSerializator
     {
-        public Task WriteFilePart(FilePart filePart, string folderPath)
+        public Task WriteFile(File file, string folderPath)
         {
             return Task.Run(() =>
             {
-                using (var fileStream =
-                    new FileStream(folderPath + filePart.SummaryInfo.FileName + filePart.PartNumber,
-                        FileMode.OpenOrCreate, FileAccess.Write))
+                foreach (var filePart in file.FileParts)
                 {
-                    using (var writer =
-                        new StreamWriter(fileStream))
+                    using (var fileStream =
+                        new FileStream(folderPath + filePart.SummaryInfo.FileName + filePart.PartNumber,
+                            FileMode.OpenOrCreate, FileAccess.Write))
                     {
-                        JsonSerializer serialiser = new JsonSerializer();
-                        serialiser.Serialize(writer, filePart);
+                        using (var writer =
+                            new StreamWriter(fileStream))
+                        {
+                            JsonSerializer serialiser = new JsonSerializer();
+                            serialiser.Serialize(writer, filePart);
+                        }
                     }
                 }
             });
