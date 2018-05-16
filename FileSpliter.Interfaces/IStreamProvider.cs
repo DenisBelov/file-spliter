@@ -7,7 +7,7 @@ namespace FileSpliter.Interfaces
 {
     public interface IStreamProvider
     {
-        File SplitStream(Stream stream, int partsCount, string fileName);
+        File SplitFile(string path, int partsCount, string fileName = null);
         Stream MergeStreams(IEnumerable<FilePart> parts);
     }
 }

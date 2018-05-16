@@ -10,49 +10,61 @@ namespace FileSpliter.BLL
 {
     public class StreamProvider : IStreamProvider
     {
-        public File SplitStream(Stream stream, int partsCount, string fileName)
+        public File SplitFile(string path, int partsCount, string fileName = null)
         {
-            var file = new File();
-            var memoryStream = new MemoryStream();
-            stream.CopyTo(memoryStream);
-            var bytesArray = memoryStream.ToArray();
-            file.FileParts = new List<FilePart>();
-            if (partsCount < bytesArray.Length)
+            using (var stream = new FileStream(path, FileMode.Open))
             {
-                for (int i = 0; i < partsCount; i++)
+                if (string.IsNullOrEmpty(fileName))
                 {
-                    var filePart = new FilePart
-                    {
-                        Id = new Guid(),
-                        Name = fileName + i,
-                        PartNumber = i,
-                        SummaryInfo = new FileSummaryInfo
-                        {
-                            FileName = fileName,
-                            FileParts = new List<FilePartInfo>()
-                        }
-                    };
-                    var arraySize = i == partsCount - 1
-                        ? bytesArray.Length / partsCount
-                        : (int) Math.Round((double) bytesArray.Length / partsCount);
-                    var bytesArrayPart = new byte[arraySize];
-                    for (int j = 0; j < arraySize; j++)
-                    {
-                        bytesArrayPart[j] = bytesArray[arraySize * i + j];
-                    }
-                    filePart.DataBytesArray = bytesArrayPart;
-                    file.FileParts.Add(filePart);
+                    var slashIndex = path.LastIndexOf("\\", StringComparison.Ordinal);
+                    var name = slashIndex > 0 ? path.Substring(slashIndex + 1, path.Length - slashIndex - 1) : path;
+                    var dotIndex = name.LastIndexOf(".", StringComparison.Ordinal);
+                    fileName = dotIndex > 0 ? name.Substring(0, dotIndex) : name;
                 }
+                var file = new File();
+                var memoryStream = new MemoryStream();
+                stream.CopyTo(memoryStream);
+                var bytesArray = memoryStream.ToArray();
+                file.FileParts = new List<FilePart>();
+                var fileId = Guid.NewGuid();
+                if (partsCount < bytesArray.Length)
+                {
+                    for (int i = 0, calculatedSize = 0; i < partsCount; i++)
+                    {
+                        var filePart = new FilePart
+                        {
+                            Id = fileId,
+                            Name = fileName + "_part" + (i + 1),
+                            PartNumber = i + 1,
+                            SummaryInfo = new FileSummaryInfo
+                            {
+                                FileName = fileName,
+                                FileParts = new List<FilePartInfo>()
+                            }
+                        };
+                        var arraySize = /*i == partsCount - 1 ?*/
+                            (bytesArray.Length - calculatedSize) / (partsCount - i);
+                            //: (int)Math.Floor((double)bytesArray.Length / partsCount);
+                        var bytesArrayPart = new byte[arraySize];
+                        for (int j = 0; j < arraySize; j++)
+                        {
+                            bytesArrayPart[j] = bytesArray[calculatedSize + j];
+                        }
+                        filePart.DataBytesArray = bytesArrayPart;
+                        file.FileParts.Add(filePart);
+                        calculatedSize += arraySize;
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Stream length is less than parts count");
+                }
+                foreach (var filePart in file.FileParts)
+                {
+                    filePart.SummaryInfo.FileParts = new List<FilePartInfo>(file.FileParts.Select(f => f as FilePartInfo));
+                }
+                return file;
             }
-            else
-            {
-                throw new ArgumentException("Stream length is less than parts count");
-            }
-            foreach (var filePart in file.FileParts)
-            {
-                filePart.SummaryInfo.FileParts = new List<FilePartInfo>(file.FileParts.Select(f => f as FilePartInfo));
-            }
-            return file;
         }
 
         public Stream MergeStreams(IEnumerable<FilePart> parts)

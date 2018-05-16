@@ -20,15 +20,9 @@ namespace FileSpliter.BLL.Services
 
         public File Split(string path, int partsCount)
         {
-            using (var stream = new FileStream(path, FileMode.Open))
-            {
-                var slashIndex = path.IndexOf("/", StringComparison.Ordinal);
-                var name = slashIndex > 0 ? path.Substring(slashIndex, path.Length - slashIndex) : path;
-                var dotIndex = path.LastIndexOf(".", StringComparison.Ordinal);
-                name = dotIndex > 0 ? name.Substring(0, dotIndex) : name;
-                var file = _streamProvider.SplitStream(stream, partsCount, name);
-                return file;
-            }
+            var file = _streamProvider.SplitFile(path, partsCount);
+            return file;
+
         }
 
         public void SaveParts(File file, string path)
@@ -56,7 +50,7 @@ namespace FileSpliter.BLL.Services
             var file = new File();
             file.FileParts.Add(part);
             foreach (var filePart in part.SummaryInfo.FileParts)
-            {   
+            {
                 file.FileParts.Add(new FilePart
                 {
                     IsAvailable = false,
