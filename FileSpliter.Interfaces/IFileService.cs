@@ -9,5 +9,7 @@ namespace FileSpliter.Interfaces
         void SaveParts(File file, string path);
         void SaveFile(File file, string path);
         Task<File> ReadFilePart(string path);
+        File ReadAllFileParts(string path, File file);
+        int GetPossiblePartsCount(string path);
     }
 }

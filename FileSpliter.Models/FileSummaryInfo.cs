@@ -8,5 +8,6 @@ namespace FileSpliter.Models
     {
         public string FileName { get; set; }
         public List<FilePartInfo> FileParts { get; set; }
+        public string FileId { get; set; }
     }
 }

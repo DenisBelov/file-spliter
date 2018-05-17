@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -21,15 +22,15 @@ namespace FileSpliter.WPF.ViewModels
                 {
                     FileParts.Add(new FilePartViewModel
                     {
-                        Id = filePart.Id,
-                        IsAvailable = true,
-                        Name = filePart.Name,
-                        FileName = filePart.SummaryInfo.FileName,
-                        Size = filePart.DataBytesArray.Length
+                        Id = filePart.PartInfo.Id,
+                        IsAvailable = filePart.IsAvailable,
+                        Name = filePart.PartInfo.Name,
+                        FileName = filePart.SummaryInfo?.FileName,
+                        Size = filePart.DataBytesArray?.Length ?? 0
                     });
                 }
 
-                OnPropertyChanged(nameof(FilePart));
+                OnPropertyChanged(nameof(FileParts));
             }
         }
 
@@ -46,6 +47,16 @@ namespace FileSpliter.WPF.ViewModels
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private List<FilePartInfo> GetFilePartsInfo(IEnumerable<List<FilePartInfo>> parts)
+        {
+            var result = new List<FilePartInfo>();
+            foreach (var part in parts)
+            {
+                result = result.Where(p => !part.Exists(f => f.Id == p.Id)).Union(part).ToList();
+            }
+            return result;
         }
     }
 }

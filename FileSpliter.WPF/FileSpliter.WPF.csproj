@@ -36,6 +36,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -54,9 +55,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\BoolToVisibilityReversedConverter.cs" />
     <Compile Include="Converters\DoubleToIntConverter.cs" />
+    <Compile Include="Converters\BoolToColorConverter.cs" />
+    <Compile Include="Converters\FilePartMissingToBoolConverter.cs" />
     <Compile Include="Converters\NullToCollapsedConverter.cs" />
     <Compile Include="Converters\NullToVisibleConverter.cs" />
+    <Compile Include="Exceptions\InvalidFormatException.cs" />
     <Compile Include="FileSplitOptionsWindow.xaml.cs">
       <DependentUpon>FileSplitOptionsWindow.xaml</DependentUpon>
     </Compile>
@@ -94,10 +99,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="FileSpliter.en.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Resource Include="fonts\RussoOne-Regular.ttf" />
+    <Resource Include="fonts\YanoneKaffeesatz-Bold.ttf" />
+    <Resource Include="fonts\YanoneKaffeesatz-ExtraLight.ttf" />
+    <Resource Include="fonts\YanoneKaffeesatz-Light.ttf" />
+    <Resource Include="fonts\YanoneKaffeesatz-Regular.ttf" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

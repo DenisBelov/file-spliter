@@ -10,6 +10,13 @@ namespace FileSpliter.BLL
 {
     public class StreamProvider : IStreamProvider
     {
+        private IFileHasher _fileHasher;
+
+        public StreamProvider(IFileHasher fileHasher)
+        {
+            _fileHasher = fileHasher;
+        }
+
         public File SplitFile(string path, int partsCount, string fileName = null)
         {
             using (var stream = new FileStream(path, FileMode.Open))
@@ -21,36 +28,40 @@ namespace FileSpliter.BLL
                     var dotIndex = name.LastIndexOf(".", StringComparison.Ordinal);
                     fileName = dotIndex > 0 ? name.Substring(0, dotIndex) : name;
                 }
-                var file = new File();
+                var file = new File(_fileHasher.Hash(path, stream));
                 var memoryStream = new MemoryStream();
                 stream.CopyTo(memoryStream);
                 var bytesArray = memoryStream.ToArray();
                 file.FileParts = new List<FilePart>();
-                var fileId = Guid.NewGuid();
-                if (partsCount < bytesArray.Length)
+                if (partsCount <= bytesArray.Length)
                 {
                     for (int i = 0, calculatedSize = 0; i < partsCount; i++)
                     {
                         var filePart = new FilePart
                         {
-                            Id = fileId,
-                            Name = fileName + "_part" + (i + 1),
-                            PartNumber = i + 1,
+                            PartInfo = new FilePartInfo
+                            {
+                                Id = file.Id + i,
+                                Name = fileName + "_part" + (i + 1),
+                                PartNumber = i + 1
+                            },
                             SummaryInfo = new FileSummaryInfo
                             {
+                                FileId = file.Id,
                                 FileName = fileName,
                                 FileParts = new List<FilePartInfo>()
-                            }
+                            },
+                            IsAvailable = true
                         };
-                        var arraySize = /*i == partsCount - 1 ?*/
+                        var arraySize =
                             (bytesArray.Length - calculatedSize) / (partsCount - i);
-                            //: (int)Math.Floor((double)bytesArray.Length / partsCount);
                         var bytesArrayPart = new byte[arraySize];
                         for (int j = 0; j < arraySize; j++)
                         {
                             bytesArrayPart[j] = bytesArray[calculatedSize + j];
                         }
                         filePart.DataBytesArray = bytesArrayPart;
+                        filePart.PartInfo.Id += bytesArrayPart.Length;
                         file.FileParts.Add(filePart);
                         calculatedSize += arraySize;
                     }
@@ -61,7 +72,7 @@ namespace FileSpliter.BLL
                 }
                 foreach (var filePart in file.FileParts)
                 {
-                    filePart.SummaryInfo.FileParts = new List<FilePartInfo>(file.FileParts.Select(f => f as FilePartInfo));
+                    filePart.SummaryInfo.FileParts = new List<FilePartInfo>(file.FileParts.Select(f => f.PartInfo));
                 }
                 return file;
             }

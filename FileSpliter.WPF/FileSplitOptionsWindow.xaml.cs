@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using FileSpliter.Interfaces;
 using Microsoft.Win32;
 
 namespace FileSpliter.WPF
@@ -10,20 +11,13 @@ namespace FileSpliter.WPF
     public partial class FileSplitOptionsWindow
     {
         private readonly Action<int, string> _callback;
-        private readonly string _fileName;
-        public FileSplitOptionsWindow(Action<int, string> callback)
+        private string _fileName;
+        private readonly IFileService _fileService;
+        public FileSplitOptionsWindow(Action<int, string> callback, IFileService fileService)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            if (openFileDialog.ShowDialog().Value)
-            {
-                _callback = callback;
-                InitializeComponent();
-                _fileName = openFileDialog.FileName;
-            }
-            else
-            {
-                Close();
-            }
+            InitializeComponent();
+            _callback = callback;
+            _fileService = fileService;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -37,6 +31,20 @@ namespace FileSpliter.WPF
         {
             DialogResult = false;
             Close();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            if (openFileDialog.ShowDialog().Value)
+            {
+                slider.Maximum = Math.Min(100, _fileService.GetPossiblePartsCount(openFileDialog.FileName));
+                _fileName = openFileDialog.FileName;
+            }
+            else
+            {
+                Close();
+            }
         }
     }
 }

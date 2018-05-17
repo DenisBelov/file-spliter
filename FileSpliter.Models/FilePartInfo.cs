@@ -6,7 +6,7 @@ namespace FileSpliter.Models
     public class FilePartInfo
     {
         public string Name { get; set; }
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public int PartNumber { get; set; }
     }
 }

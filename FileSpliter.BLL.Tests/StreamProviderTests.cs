@@ -19,11 +19,11 @@ namespace FileSpliter.BLL.Tests
         /// set new instance of StreamProvider 
         /// to SUT field
         /// </summary>
-        [SetUp]
-        public void Setup()
-        {
-            SUT = new StreamProvider();
-        }
+        //[SetUp]
+        //public void Setup()
+        //{
+        //    SUT = new StreamProvider();
+        //}
 
         /// <summary>
         /// create byte array, that

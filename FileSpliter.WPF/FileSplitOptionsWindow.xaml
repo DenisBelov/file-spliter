@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:FileSpliter.WPF"
         xmlns:Converters="clr-namespace:FileSpliter.WPF.Converters" x:Class="FileSpliter.WPF.FileSplitOptionsWindow"
         mc:Ignorable="d"
-        Title="FileSplitOptionsWindow" Height="200" Width="400">
+        Title="FileSplitOptionsWindow" Height="200" Width="400" Loaded="Window_Loaded">
     <Window.Resources>
         <Converters:DoubleToIntConverter x:Key="DoubleToIntConverter"/>
     </Window.Resources>
