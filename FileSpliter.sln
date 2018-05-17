@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSpliter.BLL.Tests", "Fi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSpliter.WPF", "FileSpliter.WPF\FileSpliter.WPF.csproj", "{396FFA22-6A79-47DE-999C-CC3F69D2FE52}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FileSpliter.Installer", "FileSpliter.Installer\FileSpliter.Installer.vdproj", "{E98D655D-AF0E-4EA6-BD53-72BDC8A781BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{396FFA22-6A79-47DE-999C-CC3F69D2FE52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{396FFA22-6A79-47DE-999C-CC3F69D2FE52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{396FFA22-6A79-47DE-999C-CC3F69D2FE52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E98D655D-AF0E-4EA6-BD53-72BDC8A781BF}.Debug|Any CPU.ActiveCfg = Debug
+		{E98D655D-AF0E-4EA6-BD53-72BDC8A781BF}.Debug|Any CPU.Build.0 = Debug
+		{E98D655D-AF0E-4EA6-BD53-72BDC8A781BF}.Release|Any CPU.ActiveCfg = Release
+		{E98D655D-AF0E-4EA6-BD53-72BDC8A781BF}.Release|Any CPU.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
