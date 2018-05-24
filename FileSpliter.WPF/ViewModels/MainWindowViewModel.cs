@@ -26,7 +26,7 @@ namespace FileSpliter.WPF.ViewModels
                         IsAvailable = filePart.IsAvailable,
                         Name = filePart.PartInfo.Name,
                         FileName = filePart.SummaryInfo?.FileName,
-                        Size = filePart.DataBytesArray?.Length ?? 0
+                        Size = filePart.PartInfo.PartSize
                     });
                 }
 

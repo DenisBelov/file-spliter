@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="File.cs" />
+    <Compile Include="FilePartBuffered.cs" />
     <Compile Include="FilePartInfo.cs" />
     <Compile Include="FileSummaryInfo.cs" />
     <Compile Include="FilePart.cs" />

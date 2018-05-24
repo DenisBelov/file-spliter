@@ -3,12 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FileSpliter.WPF"
-        xmlns:Converters="clr-namespace:FileSpliter.WPF.Converters" x:Class="FileSpliter.WPF.FileSplitOptionsWindow"
+    xmlns:converters="clr-namespace:FileSpliter.WPF.Converters" x:Class="FileSpliter.WPF.FileSplitOptionsWindow"
         mc:Ignorable="d"
         Title="FileSplitOptionsWindow" Height="200" Width="400" Loaded="Window_Loaded">
     <Window.Resources>
-        <Converters:DoubleToIntConverter x:Key="DoubleToIntConverter"/>
+        <converters:DoubleToIntConverter x:Key="DoubleToIntConverter"/>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -18,12 +17,19 @@
         <Grid>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Label Content="Choose file parts' count"/>
-                <Slider x:Name="slider" Maximum="100" Minimum="0"/>
-                <Label Content="{Binding Value, Converter={StaticResource DoubleToIntConverter}, ElementName=slider}" HorizontalAlignment="Center"/>
+                <Slider x:Name="Slider" Maximum="100" Minimum="0" ValueChanged="Slider_ValueChanged"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="{Binding Value, Converter={StaticResource DoubleToIntConverter}, ElementName=Slider}" HorizontalAlignment="Center"/>
+                    <Label Grid.Column="1"  Name="FileLengthLabel" HorizontalAlignment="Center"/>
+                </Grid>
             </StackPanel>
         </Grid>
         <DockPanel Grid.Row="1">
-            <Button Width="60" Height="30" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,10,0" Content="Cancel" Name="CancelButton" Click="CancelButton_Click"/>
+            <Button Width="Auto" Height="30" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,10,0" Content="Cancel" Name="CancelButton" Click="CancelButton_Click"/>
             <Button Width="60" Height="30" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0,0,10,0" Content="OK" Name="OkButton" Click="Button_Click"/>
         </DockPanel>
     </Grid>

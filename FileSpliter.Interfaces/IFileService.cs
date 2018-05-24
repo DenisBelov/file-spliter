@@ -5,11 +5,12 @@ namespace FileSpliter.Interfaces
 {
     public interface IFileService
     {
-        File Split(string path, int partsCount);
-        void SaveParts(File file, string path);
+        Task<File> Split(string path, int partsCount);
+        Task SaveParts(File file, string path);
         void SaveFile(File file, string path);
-        Task<File> ReadFilePart(string path);
-        File ReadAllFileParts(string path, File file);
+        File ReadFilePart(string path);
+        Task<File> ReadAllFileParts(string path, File file);
         int GetPossiblePartsCount(string path);
+        long GetPossiblePartsLength(string path, int count);
     }
 }

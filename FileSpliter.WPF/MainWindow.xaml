@@ -1,81 +1,111 @@
 ﻿<Window
-        Name="MainWindowForm"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:FileSpliter.WPF"
-        xmlns:Converters="clr-namespace:FileSpliter.WPF.Converters" x:Class="FileSpliter.WPF.MainWindow"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="720" Width="1280" WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True" Background="Transparent">
+    Name="MainWindowForm"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:FileSpliter.WPF"
+    xmlns:converters="clr-namespace:FileSpliter.WPF.Converters" x:Class="FileSpliter.WPF.MainWindow"
+    mc:Ignorable="d"
+    Title="MainWindow" Height="720" Width="1280" WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True"
+    Background="Transparent">
     <Window.Resources>
-        <Converters:FilePartMissingToBoolConverter x:Key="FilePartMissingToBoolConverter"/>
-        <Converters:BoolToVisibilityReversedConverter x:Key="BoolToVisibilityReversedConverter"/>
-        <Converters:NullToCollapsedConverter x:Key="NullToCollapsedConverter"/>
-        <Converters:NullToVisibleConverter x:Key="NullToVisibilityConverter"/>
+        <converters:SizeConvertor x:Key="SizeConvertor" />
+        <converters:FilePartMissingToBoolConverter x:Key="FilePartMissingToBoolConverter" />
+        <converters:BoolToVisibilityReversedConverter x:Key="BoolToVisibilityReversedConverter" />
+        <converters:NullToCollapsedConverter x:Key="NullToCollapsedConverter" />
+        <converters:NullToVisibleConverter x:Key="NullToVisibilityConverter" />
     </Window.Resources>
     <Window.Effect>
-        <DropShadowEffect BlurRadius="15" Direction="-90" Opacity="0.4" RenderingBias="Quality"/>
+        <DropShadowEffect BlurRadius="15" Direction="-90" Opacity="0.4" RenderingBias="Quality" />
     </Window.Effect>
-    <Grid Margin="30" Background="White">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
-            <RowDefinition Height="48px"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <DockPanel Background="#dfe6e9">
-            <Button Height="20" Width="30" x:Name="Close" HorizontalAlignment="Right" DockPanel.Dock="Right" Click="Close_Click" Background="#d63031" Margin="0,0,10,0" BorderThickness="0"/>
-            <Button Height="Auto" Width="30" x:Name="Minimaze" HorizontalAlignment="Right" Margin="0,0,10,0" Background="#b2bec3" BorderThickness="0" Click="Minimaze_Click"/>
-        </DockPanel>
-        <DockPanel Background="#0984e3" Grid.Row="1" MouseLeftButtonDown="DockPanel_MouseDown">
-            <Label Margin="5" FontFamily="/fonts/#Yanone Kaffeesatz" Foreground="White" FontSize="30">File Spliter</Label>
-        </DockPanel>
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="4*" MinWidth="560"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="2*"/>
-            </Grid.ColumnDefinitions>
-            <GridSplitter x:Name="gridSplitter" Grid.Column="1" ResizeDirection="Columns" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></GridSplitter>
-            <Grid Grid.Column="0" Background="#74b9ff" MinWidth="400">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="60px"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <DockPanel Height="60">
-                    <Button HorizontalAlignment="Left" VerticalAlignment="Center" Click="OpenFileButton_Click" x:Name="OpenFileButton" Content="Open File"/>
-                    <Button HorizontalAlignment="Left" VerticalAlignment="Center" Click="SaveFileButton_OnClick" x:Name="SaveFileButton" Content="Save File" IsEnabled="{Binding  FileParts, Converter={StaticResource FilePartMissingToBoolConverter}, UpdateSourceTrigger=PropertyChanged}"></Button>
-                    <Button HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" x:Name="SavePartsButton" Content="Save Parts" Click="SavePartsButton_Click" IsEnabled="{Binding  FileParts, Converter={StaticResource FilePartMissingToBoolConverter}, UpdateSourceTrigger=PropertyChanged}"/>
-                    <Button HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" x:Name="OpenPartsButtoon" Click="OpenPartsButtoon_Click" Content="Open Parts"/>
-                </DockPanel>
-                <ListBox x:Name="FilePartsListBox" ItemsSource="{Binding FileParts}" Grid.Row="1"  ItemContainerStyle="{StaticResource MainListItem}" Padding="0,10">
-                </ListBox>
-            </Grid>
-            <Grid Grid.Column="2" x:Name="FilePartInfo" DataContext="{Binding SelectedItem, ElementName=FilePartsListBox}" Margin="10">
-                <Label VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="28" Foreground="#7F808080" FontWeight="Bold" Content="Select file part" Visibility="{Binding SelectedItem, Converter={StaticResource NullToVisibilityConverter}, ElementName=FilePartsListBox}"/>
-                <Grid  Margin="10" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}}" Visibility="{Binding SelectedItem, Converter={StaticResource NullToCollapsedConverter}, ElementName=FilePartsListBox}">
-                    <Grid Margin="10" DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150"></ColumnDefinition>
-                            <ColumnDefinition Width="3*"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                        </Grid.RowDefinitions>
-                        <Label FontSize="20" FontWeight="Bold" Grid.Column="0" Grid.Row="0">Id</Label>
-                        <Label FontSize="20" FontWeight="Bold" Grid.Column="0" Grid.Row="1">Name</Label>
-                        <Label FontSize="20" FontWeight="Bold" Grid.Column="0" Grid.Row="2">File name</Label>
-                        <Label FontSize="20" FontWeight="Bold" Grid.Column="0" Grid.Row="3">Size (bytes)</Label>
-                        <TextBlock FontSize="20" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Text="{Binding Name}" MinWidth="250"></TextBlock>
-                        <TextBlock FontSize="20" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Text="{Binding Size}" MinWidth="250"></TextBlock>
-                        <TextBlock FontSize="20" Grid.Column="1" Grid.Row="0" TextWrapping="Wrap" Text="{Binding Id}" MinWidth="250"></TextBlock>
-                        <TextBlock FontSize="20" Grid.Column="1" Grid.Row="2" TextWrapping="Wrap" Text="{Binding FileName}" MinWidth="250"></TextBlock>
-                    </Grid>
-                    <Grid>
-                        <Button Click="OpenPart_OnClick" Name="OpenPart" Content="Open part" Background="#0984e3" Foreground="White" VerticalAlignment="Bottom" Visibility="{Binding IsAvailable, Converter={StaticResource BoolToVisibilityReversedConverter}}"></Button>
+    <Grid Margin="30">
+        <Grid Panel.ZIndex="10"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,20,0,0" Name="LoaderGrid" Visibility="Collapsed">
+            <Grid Background="Black" Opacity="0.3" ></Grid>
+            <local:LoadingIndicator BorderBrush="#0984e3" Foreground="#0984e3" Style="{StaticResource LoadingIndicatorArcsStyleKey}"/>
+        </Grid>
+        <Grid Background="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="48px" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <DockPanel Background="#dfe6e9">
+                <Button Height="20" Width="30" x:Name="Close" HorizontalAlignment="Right" DockPanel.Dock="Right"
+                    Click="Close_Click" Background="#d63031" Margin="0,0,10,0" BorderThickness="0" />
+                <Button Height="Auto" Width="30" x:Name="Minimaze" HorizontalAlignment="Right" Margin="0,0,10,0"
+                    Background="#b2bec3" BorderThickness="0" Click="Minimaze_Click" />
+            </DockPanel>
+            <DockPanel Background="#0984e3" Grid.Row="1" MouseLeftButtonDown="DockPanel_MouseDown">
+                <Label Margin="5" FontFamily="/fonts/#Yanone Kaffeesatz" Foreground="White" FontSize="30">File Spliter</Label>
+            </DockPanel>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*" MinWidth="560" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+                <GridSplitter x:Name="gridSplitter" Grid.Column="1" ResizeDirection="Columns" HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch" />
+                <Grid Grid.Column="0" Background="#74b9ff" MinWidth="400">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60px" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <DockPanel Height="60">
+                        <Button HorizontalAlignment="Left" VerticalAlignment="Center" Click="OpenFileButton_Click"
+                            x:Name="OpenFileButton" Content="Open File" />
+                        <Button HorizontalAlignment="Left" VerticalAlignment="Center" Click="SaveFileButton_OnClick"
+                            x:Name="SaveFileButton" Content="Save File"
+                            IsEnabled="{Binding  FileParts, Converter={StaticResource FilePartMissingToBoolConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"
+                            x:Name="SavePartsButton" Content="Save Parts" Click="SavePartsButton_Click"
+                            IsEnabled="{Binding  FileParts, Converter={StaticResource FilePartMissingToBoolConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"
+                            x:Name="OpenPartsButtoon" Click="OpenPartsButtoon_Click" Content="Open Parts" />
+                    </DockPanel>
+                    <ListBox x:Name="FilePartsListBox" ItemsSource="{Binding FileParts}" Grid.Row="1"
+                         ItemContainerStyle="{StaticResource MainListItem}" Padding="0,10" />
+                </Grid>
+                <Grid Grid.Column="2" x:Name="FilePartInfo"
+                  DataContext="{Binding SelectedItem, ElementName=FilePartsListBox}" Margin="10">
+                    <Label VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="28" Foreground="#7F808080"
+                       FontWeight="Bold" Content="Select file part"
+                       Visibility="{Binding SelectedItem, Converter={StaticResource NullToVisibilityConverter}, ElementName=FilePartsListBox}" />
+                    <Grid Margin="10"
+                      DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}}"
+                      Visibility="{Binding SelectedItem, Converter={StaticResource NullToCollapsedConverter}, ElementName=FilePartsListBox}">
+                        <Grid Margin="10"
+                          DataContext="{Binding DataContext, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150" />
+                                <ColumnDefinition Width="3*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Label FontSize="20" FontWeight="Bold" Grid.Column="0" Grid.Row="0">Id</Label>
+                            <Label FontSize="20" FontWeight="Bold" Grid.Column="0" Grid.Row="1">Name</Label>
+                            <Label FontSize="20" FontWeight="Bold" Grid.Column="0" Grid.Row="2">File name</Label>
+                            <Label FontSize="20" FontWeight="Bold" Grid.Column="0" Grid.Row="3">Size (bytes)</Label>
+                            <TextBlock FontSize="20" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Text="{Binding Name}"
+                                   MinWidth="250" />
+                            <TextBlock FontSize="20" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap"
+                                   Text="{Binding Size, Converter={StaticResource SizeConvertor}}" MinWidth="250" />
+                            <TextBlock FontSize="20" Grid.Column="1" Grid.Row="0" TextWrapping="Wrap" Text="{Binding Id}"
+                                   MinWidth="250" />
+                            <TextBlock FontSize="20" Grid.Column="1" Grid.Row="2" TextWrapping="Wrap"
+                                   Text="{Binding FileName}" MinWidth="250" />
+                        </Grid>
+                        <Grid>
+                            <Button Click="OpenPart_OnClick" Name="OpenPart" Content="Open part" Background="#0984e3"
+                                Foreground="White" VerticalAlignment="Bottom"
+                                Visibility="{Binding IsAvailable, Converter={StaticResource BoolToVisibilityReversedConverter}}" />
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>

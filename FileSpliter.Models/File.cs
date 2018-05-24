@@ -19,6 +19,5 @@ namespace FileSpliter.Models
             get { return _fileParts = _fileParts.OrderBy(f => f.PartInfo.PartNumber).ToList(); }
             set => _fileParts = value;
         }
-
     }
 }

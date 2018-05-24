@@ -61,10 +61,12 @@
     <Compile Include="Converters\FilePartMissingToBoolConverter.cs" />
     <Compile Include="Converters\NullToCollapsedConverter.cs" />
     <Compile Include="Converters\NullToVisibleConverter.cs" />
+    <Compile Include="Converters\SizeConvertor.cs" />
     <Compile Include="Exceptions\InvalidFormatException.cs" />
     <Compile Include="FileSplitOptionsWindow.xaml.cs">
       <DependentUpon>FileSplitOptionsWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LoadingIndicator.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ViewModels\FilePartViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
@@ -109,6 +111,7 @@
     <Resource Include="fonts\YanoneKaffeesatz-ExtraLight.ttf" />
     <Resource Include="fonts\YanoneKaffeesatz-Light.ttf" />
     <Resource Include="fonts\YanoneKaffeesatz-Regular.ttf" />
+    <None Include="ClassDiagram.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -130,6 +133,9 @@
       <Project>{FEBAB5B9-C25B-45CC-8525-48D19568060B}</Project>
       <Name>FileSpliter.Models</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Utils\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Forms;
 using FileSpliter.BLL;
 using FileSpliter.BLL.Services;
 using FileSpliter.Interfaces;
+using FileSpliter.Models;
 using FileSpliter.WPF.Exceptions;
+using FileSpliter.WPF.Properties;
 using FileSpliter.WPF.ViewModels;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.Forms.MessageBox;
@@ -18,18 +21,31 @@ namespace FileSpliter.WPF
     /// </summary>
     public partial class MainWindow
     {
-        private IFileService _fileService;
+        private readonly IFileService _fileService;
         private readonly MainWindowViewModel _viewModel;
+        private readonly MemoryBufferManager _memoryBufferManager;
+        private const string BufferPath = "BufferPath";
+        private const string BufferName = "FileSpliterBuffer";
+
         public MainWindow()
         {
+            if (string.IsNullOrWhiteSpace(Settings.Default[BufferPath].ToString()))
+            {
+                Settings.Default[BufferPath] = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + BufferName;
+                Settings.Default.Save();
+            }
             _viewModel = new MainWindowViewModel();
             InitializeComponent();
             DataContext = _viewModel;
-            _fileService = new FileService(new FileSerializator(), new StreamProvider(new FileHasher()), new FileHasher());
+            _memoryBufferManager = new MemoryBufferManager(Settings.Default[BufferPath].ToString());
+            var serializator = new FileSerializator(_memoryBufferManager);
+            _fileService = new FileService(serializator,
+                new StreamProvider(new FileHasher(), serializator, _memoryBufferManager), new FileHasher());
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
         {
+            _memoryBufferManager.Flush().Wait();
             Application.Current.Shutdown();
         }
 
@@ -46,16 +62,22 @@ namespace FileSpliter.WPF
             }
         }
 
-        private void SplitFile(int partsCount, string filePath)
+        private async void SplitFile(int partsCount, string filePath)
         {
             try
             {
+                LoaderGrid.Visibility = Visibility.Visible;
                 var file = _fileService.Split(filePath, partsCount);
-                _viewModel.File = file;
+                _viewModel.File = await file;
+                LoaderGrid.Visibility = Visibility.Collapsed;
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                LoaderGrid.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -68,9 +90,11 @@ namespace FileSpliter.WPF
                 {
                     try
                     {
-                        var file = await _fileService.ReadFilePart(openFileDialog.FileName);
-                        file = _fileService.ReadAllFileParts(openFileDialog.FileName, file);
+                        LoaderGrid.Visibility = Visibility.Visible;
+                        var file = _fileService.ReadFilePart(openFileDialog.FileName);
+                        file = await _fileService.ReadAllFileParts(openFileDialog.FileName, file);
                         _viewModel.File = file;
+                        LoaderGrid.Visibility = Visibility.Collapsed;
                     }
                     catch (InvalidFormatException exception)
                     {
@@ -81,6 +105,10 @@ namespace FileSpliter.WPF
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                LoaderGrid.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -89,23 +117,29 @@ namespace FileSpliter.WPF
             MainWindowForm.DragMove();
         }
 
-        private void SavePartsButton_Click(object sender, RoutedEventArgs e)
+        private async void SavePartsButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
                 if (folderBrowserDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    _fileService.SaveParts(_viewModel.File, folderBrowserDialog.SelectedPath);
+                    LoaderGrid.Visibility = Visibility.Visible;
+                    await _fileService.SaveParts(_viewModel.File, folderBrowserDialog.SelectedPath);
+                    LoaderGrid.Visibility = Visibility.Collapsed;
                 }
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                LoaderGrid.Visibility = Visibility.Collapsed;
+            }
         }
 
-        private void OpenPart_OnClick(object sender, RoutedEventArgs e)
+        private async void OpenPart_OnClick(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -114,8 +148,10 @@ namespace FileSpliter.WPF
                 {
                     try
                     {
-                        var file = _fileService.ReadAllFileParts(openFileDialog.FileName, _viewModel.File);
+                        LoaderGrid.Visibility = Visibility.Visible;
+                        var file = await _fileService.ReadAllFileParts(openFileDialog.FileName, _viewModel.File);
                         _viewModel.File = file;
+                        LoaderGrid.Visibility = Visibility.Collapsed;
                     }
                     catch (InvalidFormatException exception)
                     {
@@ -126,6 +162,10 @@ namespace FileSpliter.WPF
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                LoaderGrid.Visibility = Visibility.Collapsed;
             }
         }
 

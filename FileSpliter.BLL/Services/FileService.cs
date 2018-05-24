@@ -10,9 +10,9 @@ namespace FileSpliter.BLL.Services
 {
     public class FileService : IFileService
     {
-        private IFileSerializator _fileSerializator;
-        private IStreamProvider _streamProvider;
-        private IFileHasher _fileHasher;
+        private readonly IFileSerializator _fileSerializator;
+        private readonly IStreamProvider _streamProvider;
+        private readonly IFileHasher _fileHasher;
 
         public FileService(IFileSerializator serializator, IStreamProvider streamProvider, IFileHasher fileHasher)
         {
@@ -21,37 +21,35 @@ namespace FileSpliter.BLL.Services
             _fileHasher = fileHasher;
         }
 
-        public File Split(string path, int partsCount)
+        public async Task<File> Split(string path, int partsCount)
         {
-            var file = _streamProvider.SplitFile(path, partsCount);
-            return file;
-
+            var file = _streamProvider.SplitFileAsync(path, partsCount);
+            return await file;
         }
 
-        public void SaveParts(File file, string path)
+        public async Task SaveParts(File file, string path)
         {
-            foreach (var filePart in file.FileParts)
+            if (file != null)
             {
-                _fileSerializator.WriteFilePart(filePart, path);
+                foreach (var filePart in file.FileParts)
+                {
+                    await _fileSerializator.WriteFilePart(filePart, filePart.PartInfo.Name, path);
+                }
             }
         }
 
         public void SaveFile(File file, string path)
         {
-            using (var streamToWrite = _streamProvider.MergeStreams(file.FileParts))
-            {
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    streamToWrite.CopyTo(stream);
-                }
-            }
+            _streamProvider.MergeStreams(file.FileParts, path).Close();
         }
 
-        public async Task<File> ReadFilePart(string path)
+        public File ReadFilePart(string path)
         {
-            var part = await _fileSerializator.ReadFilePart(path);
-            var file = new File(part.SummaryInfo.FileId);
-            file.Id = part.SummaryInfo.FileId;
+            var part = _fileSerializator.ReadFilePart(path);
+            var file = new File(part.SummaryInfo.FileId)
+            {
+                Id = part.SummaryInfo.FileId
+            };
             file.FileParts.Add(part);
             foreach (var filePart in part.SummaryInfo.FileParts.Where(f => f.Id != part.PartInfo.Id))
             {
@@ -69,9 +67,9 @@ namespace FileSpliter.BLL.Services
             return file;
         }
 
-        public File ReadAllFileParts(string path, File file)
+        public async Task<File> ReadAllFileParts(string path, File file)
         {
-            var fileParts = _fileSerializator.ReadAllFilePartsFromFolder(path, file.Id).Result;
+            var fileParts = await _fileSerializator.ReadAllFilePartsFromFolder(path, file.Id);
             file.FileParts = file.FileParts
                 .Where(f => f.IsAvailable && !fileParts.Exists(p => p.PartInfo.Id == f.PartInfo.Id))
                 .Union(fileParts).ToList();
@@ -83,7 +81,22 @@ namespace FileSpliter.BLL.Services
 
         public int GetPossiblePartsCount(string path)
         {
-            return System.IO.File.ReadAllBytes(path).Length;
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                return stream.Length > 100 ? 100 : (int) stream.Length;
+            }
+        }
+
+        public long GetPossiblePartsLength(string path, int count)
+        {
+            if (count != 0)
+            {
+                using (var stream = new FileStream(path, FileMode.Open))
+                {
+                    return stream.Length / count;
+                }
+            }
+            return 0;
         }
     }
 }

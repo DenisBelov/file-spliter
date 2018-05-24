@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using FileSpliter.BLL.Extensions;
 using FileSpliter.Interfaces;
 using Microsoft.Win32;
 
@@ -23,7 +24,7 @@ namespace FileSpliter.WPF
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-            _callback((int)slider.Value, _fileName);
+            _callback((int)Slider.Value, _fileName);
             Close();
         }
 
@@ -38,13 +39,18 @@ namespace FileSpliter.WPF
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog().Value)
             {
-                slider.Maximum = Math.Min(100, _fileService.GetPossiblePartsCount(openFileDialog.FileName));
+                Slider.Maximum = Math.Min(100, _fileService.GetPossiblePartsCount(openFileDialog.FileName));
                 _fileName = openFileDialog.FileName;
             }
             else
             {
                 Close();
             }
+        }
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            FileLengthLabel.Content = _fileService.GetPossiblePartsLength(_fileName, (int) Slider.Value).ToString().GetSize();
         }
     }
 }

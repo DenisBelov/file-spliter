@@ -12,7 +12,7 @@ namespace FileSpliter.WPF.ViewModels
 
         public FilePartViewModel(FilePart filePart)
         {
-            Size = filePart.DataBytesArray.Length;
+            Size = filePart.PartInfo.PartSize;
             Name = filePart.PartInfo.Name;
             Number = filePart.PartInfo.PartNumber;
             IsAvailable = true;
@@ -28,7 +28,7 @@ namespace FileSpliter.WPF.ViewModels
         }
 
         public int Number { get; set; }
-        public int Size { get; set; }
+        public long Size { get; set; }
         public string FileName { get; set; }
         public string Name { get; set; }
         public string Id { get; set; }

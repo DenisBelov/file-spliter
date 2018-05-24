@@ -2,22 +2,28 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using FileSpliter.Interfaces;
 using FileSpliter.Models;
+using Microsoft.Win32.SafeHandles;
 using File = FileSpliter.Models.File;
 
 namespace FileSpliter.BLL
 {
     public class StreamProvider : IStreamProvider
     {
-        private IFileHasher _fileHasher;
+        private readonly IFileHasher _fileHasher;
+        private readonly IFileSerializator _fileSerializator;
+        private readonly IMemoryBufferManager _bufferManager;
 
-        public StreamProvider(IFileHasher fileHasher)
+        public StreamProvider(IFileHasher fileHasher, IFileSerializator fileSerializator, IMemoryBufferManager bufferManager)
         {
             _fileHasher = fileHasher;
+            _fileSerializator = fileSerializator;
+            _bufferManager = bufferManager;
         }
 
-        public File SplitFile(string path, int partsCount, string fileName = null)
+        public async Task<File> SplitFileAsync(string path, int partsCount, string fileName = null)
         {
             using (var stream = new FileStream(path, FileMode.Open))
             {
@@ -29,13 +35,13 @@ namespace FileSpliter.BLL
                     fileName = dotIndex > 0 ? name.Substring(0, dotIndex) : name;
                 }
                 var file = new File(_fileHasher.Hash(path, stream));
-                var memoryStream = new MemoryStream();
-                stream.CopyTo(memoryStream);
-                var bytesArray = memoryStream.ToArray();
+                var fileSize = stream.Length;
+
                 file.FileParts = new List<FilePart>();
-                if (partsCount <= bytesArray.Length)
+                if (partsCount <= fileSize)
                 {
-                    for (int i = 0, calculatedSize = 0; i < partsCount; i++)
+                    long calculatedSize = 0;
+                    for (int i = 0; i < partsCount; i++)
                     {
                         var filePart = new FilePart
                         {
@@ -53,17 +59,26 @@ namespace FileSpliter.BLL
                             },
                             IsAvailable = true
                         };
-                        var arraySize =
-                            (bytesArray.Length - calculatedSize) / (partsCount - i);
-                        var bytesArrayPart = new byte[arraySize];
-                        for (int j = 0; j < arraySize; j++)
+                        try
                         {
-                            bytesArrayPart[j] = bytesArray[calculatedSize + j];
+                            var arraySize =
+                                (fileSize - calculatedSize) / (partsCount - i);
+                            filePart.PartInfo.PartSize = arraySize;
+                            var bytesArrayPart = new byte[arraySize];
+                            stream.Read(bytesArrayPart, 0, (int)arraySize);
+                            filePart.DataBytesArray = bytesArrayPart;
+                            filePart.PartInfo.Id += bytesArrayPart.Length;
+                            file.FileParts.Add(filePart);
+                            calculatedSize += arraySize;
                         }
-                        filePart.DataBytesArray = bytesArrayPart;
-                        filePart.PartInfo.Id += bytesArrayPart.Length;
-                        file.FileParts.Add(filePart);
-                        calculatedSize += arraySize;
+                        catch (OutOfMemoryException)
+                        {
+                            foreach (var part in file.FileParts)
+                            {
+                                await _bufferManager.SaveFilePart(part);
+                            }
+                            GC.Collect();
+                        }
                     }
                 }
                 else
@@ -78,21 +93,16 @@ namespace FileSpliter.BLL
             }
         }
 
-        public Stream MergeStreams(IEnumerable<FilePart> parts)
+        public FileStream MergeStreams(IEnumerable<FilePart> parts, string fileName)
         {
             var fileParts = parts as FilePart[] ?? parts.ToArray();
-            var sumBuffer = new byte[fileParts.Sum(p => p.DataBytesArray.Length)];
-            for (int i = 0; i < sumBuffer.Length;)
+            FileStream fileStream = new FileStream(fileName, FileMode.OpenOrCreate);
+
+            foreach (var filePart in fileParts)
             {
-                foreach (var filePart in fileParts)
-                {
-                    for (int j = 0; j < filePart.DataBytesArray.Length; j++, i++)
-                    {
-                        sumBuffer[i] = filePart.DataBytesArray[j];
-                    }
-                }
+                fileStream.Write(filePart.DataBytesArray, 0, (int)filePart.PartInfo.PartSize);
             }
-            return new MemoryStream(sumBuffer);
+            return fileStream;
         }
     }
 }

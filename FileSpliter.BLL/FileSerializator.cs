@@ -11,28 +11,43 @@ namespace FileSpliter.BLL
 {
     public class FileSerializator : IFileSerializator
     {
-        public Task WriteFilePart(FilePart filePart, string folderPath)
+        private readonly MemoryBufferManager _memoryBufferManager;
+
+        public FileSerializator(MemoryBufferManager memoryBufferManager)
+        {
+            _memoryBufferManager = memoryBufferManager;
+        }
+
+        public Task WriteFilePart(FilePart filePart, string fileName, string folderPath)
         {
             return Task.Run(() =>
             {
                 using (var fileStream =
-                    new FileStream(folderPath + "\\" + filePart.SummaryInfo.FileName + "_part" + filePart.PartInfo.PartNumber,
-                        FileMode.OpenOrCreate, FileAccess.Write))
+                    new FileStream(folderPath + "\\" + fileName, FileMode.OpenOrCreate, FileAccess.Write))
                 {
-                    using (var writer =
-                        new StreamWriter(fileStream))
+                    FilePartBuffered bufferPart = null;
+                    if (filePart.DataBytesArray == null)
+                    {
+                        bufferPart = _memoryBufferManager.GetFilePartByName(fileName);
+                        filePart.DataBytesArray = bufferPart?.Data;
+                    }
+                    using (var writer = new StreamWriter(fileStream))
                     {
                         JsonSerializer serialiser = new JsonSerializer();
                         serialiser.Serialize(writer, filePart);
+                    }
+                    if (bufferPart != null)
+                    {
+                        filePart.DataBytesArray = null;
+                        GC.Collect();
                     }
                 }
             });
         }
 
-        public Task<FilePart> ReadFilePart(string path)
+        public FilePart ReadFilePart(string path)
         {
-            return Task.Run(() =>
-            {
+
                 try
                 {
                     using (var streamReader = new StreamReader(path))
@@ -46,29 +61,37 @@ namespace FileSpliter.BLL
                 }
                 catch (JsonReaderException)
                 {
-
                 }
                 catch (JsonSerializationException)
                 {
-                    
                 }
                 return null;
-            });
+
         }
 
-        public Task<List<FilePart>> ReadAllFilePartsFromFolder(string path, string id, string fileName = null)
+        public Task<List<FilePart>> ReadAllFilePartsFromFolder(string path, string fileId, string fileName = null)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 var result = new List<FilePart>();
                 var directory = new DirectoryInfo(path.GetDirectoryName());
                 var files = directory.GetFiles(fileName ?? "*");
                 foreach (var file in files)
                 {
-                    var filePart = ReadFilePart(file.FullName).Result;
-                    if (filePart != null && filePart.SummaryInfo.FileId == id)
+                    try
                     {
-                        result.Add(filePart);
+                        var filePart = ReadFilePart(file.FullName);
+                        if (filePart != null && filePart.SummaryInfo.FileId == fileId)
+                        {
+                            result.Add(filePart);
+                        }
+                    }
+                    catch (OutOfMemoryException)
+                    {
+                        foreach (var filePart in result)
+                        {
+                            await _memoryBufferManager.SaveFilePart(filePart);
+                        }
                     }
                 }
                 return result;

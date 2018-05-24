@@ -2,6 +2,8 @@
 using NUnit.Framework;
 using System;
 using System.IO;
+using FileSpliter.Interfaces;
+using Moq;
 
 namespace FileSpliter.BLL.Tests
 {
@@ -13,17 +15,24 @@ namespace FileSpliter.BLL.Tests
         /// <summary>
         /// system for test
         /// </summary>
-        private StreamProvider SUT;
+        private StreamProvider _sut;
+
+        private Mock<IFileHasher> _fileHasher;
+        private Mock<IMemoryBufferManager> _memoryBuffer;
+        private Mock<IFileSerializator> _fileSerializator;
 
         /// <summary>
         /// set new instance of StreamProvider 
         /// to SUT field
         /// </summary>
-        //[SetUp]
-        //public void Setup()
-        //{
-        //    SUT = new StreamProvider();
-        //}
+        [SetUp]
+        public void Setup()
+        {
+            _fileHasher = new Mock<IFileHasher>();
+            _memoryBuffer = new Mock<IMemoryBufferManager>();
+            _fileSerializator = new Mock<IFileSerializator>();
+            _sut = new StreamProvider(_fileHasher.Object, _fileSerializator.Object, _memoryBuffer.Object);
+        }
 
         /// <summary>
         /// create byte array, that
@@ -61,58 +70,57 @@ namespace FileSpliter.BLL.Tests
             {
                 parts[i] = new FilePart();
                 parts[i].DataBytesArray = GetBuffer(partsSizes[i]);
+                parts[i].PartInfo = new FilePartInfo{PartSize = parts[i].DataBytesArray.Length};
                 sumLength += partsSizes[i];
             }
 
             //get stream and check sum
-            Stream stream = SUT.MergeStreams(parts);
-            Assert.AreEqual(sumLength, stream.Length);
+            using (Stream stream = _sut.MergeStreams(parts, FileNameExample))
+            {
+                Assert.AreEqual(sumLength, stream.Length);
+            }
         }
 
         /// <summary>
         /// check file name in file parts
         /// </summary>
-        //[Test]
-        //public void SplitStream_SomeFileName_OriginalFileNameAndNamesInPartsShouldBeEqual()
-        //{
+        [Test]
+        public void SplitStream_SomeFileName_OriginalFileNameAndNamesInPartsShouldBeEqual()
+        {
 
-        //    //create simple stream and split it
-        //    int partsCount = 5;
-        //    string fileName = FileNameExample;
-        //    Models.File file = SUT.SplitFile(
-        //        new MemoryStream(GetBuffer(partsCount+1)), partsCount, fileName);
+            //create simple stream and split it
+            int partsCount = 5;
+            string fileName = FileNameExample;
+            Models.File file = _sut.SplitFileAsync("", partsCount, fileName).Result;
 
-        //    //check names
-        //    foreach (FilePart part in file.FileParts)
-        //        Assert.AreEqual(fileName, part.SummaryInfo.FileName);
-        //}
+            //check names
+            foreach (FilePart part in file.FileParts)
+                Assert.AreEqual(fileName, part.SummaryInfo.FileName);
+        }
 
         /// <summary>
         /// test exception throwing when
         /// stream size lower than 
         /// number of parts
         /// </summary>
-        //[Test]
-        //public void SplitStream_PartsCountGreaterThanLength_ThrowsException()
-        //{
-        //    int len = 10;
-        //    Assert.Throws<ArgumentException>(
-        //        () => SUT.SplitFile(
-        //            new MemoryStream(GetBuffer(len)), len + 10, "av"));
-        //}
+        [Test]
+        public void SplitStream_PartsCountGreaterThanLength_ThrowsException()
+        {
+            int len = 10;
+            Assert.Throws<ArgumentException>(async () => await _sut.SplitFileAsync("", len + 10, "av"));
+        }
 
         /// <summary>
         /// test number of parts after splitting
         /// </summary>
         /// <param name="partsCount">number of parts</param>
-        //[TestCase(1)]
-        //[TestCase(7)]
-        //[TestCase(10000)]
-        //public void SplitStream_VariousPartsCount_NumberOfPartsInParameterAndInResultShouldBeEqual(int partsCount)
-        //{
-        //    Models.File file = SUT.SplitFile(
-        //        new MemoryStream(GetBuffer(partsCount+1)), partsCount, FileNameExample);
-        //    Assert.AreEqual(partsCount, file.FileParts.Count);
-        //}
+        [TestCase(1)]
+        [TestCase(7)]
+        [TestCase(10000)]
+        public void SplitStream_VariousPartsCount_NumberOfPartsInParameterAndInResultShouldBeEqual(int partsCount)
+        {
+            Models.File file = _sut.SplitFileAsync("", partsCount, FileNameExample).Result;
+            Assert.AreEqual(partsCount, file.FileParts.Count);
+        }
     }
 }
